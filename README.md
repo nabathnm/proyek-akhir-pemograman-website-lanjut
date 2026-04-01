@@ -22,7 +22,7 @@ Website Manajemen Kosan Kota Malang adalah platform berbasis web yang memudahkan
 ## 👤 _Role_
 | Role   | Hak Akses           |
 | -------| ------------------- |
-| Admin  | _Manage_ semua data |
+| Admin  | Manage semua data |
 | Pemilik Kos| Melihat daftar kosan tersedia |
 | Pencari Kos| Mengupload kosan yang dimiliki      |
 
