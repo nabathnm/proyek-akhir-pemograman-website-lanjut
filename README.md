@@ -4,8 +4,8 @@ Website Manajemen Kosan Kota Malang adalah platform berbasis web yang memudahkan
 
 ## 👥 Anggota kelompok
 1. 245150700111031- Nabath Nuur Muhammad
-2. NIM - Abi Abdillah
-3. NIM - Reinhard
+2. 245150701111027 - Muhammad Abi Abdillah
+3. 245150707111043 - Reinhard Frano Randalinggi
 
 ## 🎯 Fitur-fitur
 
