@@ -1,59 +1,81 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# EasyKos
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Website Manajemen Kosan Kota Malang adalah platform berbasis web yang memudahkan pengguna mencari dan memesan kos berdasarkan lokasi, harga, dan fasilitas, serta membantu pemilik kos mengelola properti dan ketersediaan kamar secara real-time dengan sistem yang terintegrasi dan aman.
 
-## About Laravel
+## 👥 Anggota kelompok
+1. 245150700111031- Nabath Nuur Muhammad
+2. 245150701111027 - Muhammad Abi Abdillah
+3. 245150707111043 - Reinhard Frano Randalinggi
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🎯 Fitur-fitur
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Fitur Wajib
+1. Manajemen Data Kos oleh Pemilik (CRUD)
+2. Detail Kos (foto, deskripsi, harga, fasilitas, status kamar)
+3. Registrasi dan Login (Role: Admin, Pemilik Kos, Pencari Kos)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Fitur Opsional
+1. Update Status Ketersediaan Kamar
+2. Sistem Booking atau Pengajuan Sewa
+3. Pencarian dan Filter Kos berdasarkan lokasi, harga, dan fasilitas
 
-## Learning Laravel
+## 👤 _Role_
+| Role   | Hak Akses           |
+| -------| ------------------- |
+| Admin  | Manage semua data |
+| Pemilik Kos| Melihat daftar kosan tersedia |
+| Pencari Kos| Mengupload kosan yang dimiliki      |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 🔄 Alur Sistem
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Contoh:
 
-## Laravel Sponsors
+Alur 1: Registrasi dan Login Pengguna
+1. Pengguna melakukan registrasi akun sesuai role (Admin, Pemilik Kos, atau Pencari Kos)
+2. Pengguna melakukan login ke sistem
+3. Sistem memvalidasi data pengguna
+4. Sistem mengarahkan pengguna ke dashboard sesuai role
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Alur 2: Pemilik Kos Mengelola Data Kos (CRUD)
+1. Pemilik kos login
+2. Masuk ke menu manajemen kos
+3. Tambah / ubah / hapus data kos (foto, deskripsi, harga, fasilitas)
+4. Kirim data ke sistem
+5. Data disimpan atau diperbarui di database
 
-### Premium Partners
+Alur 3: Melihat Detail Kos
+1. Pengguna login
+2. Pengguna memilih kos dari daftar
+3. Sistem menampilkan detail kos (foto, deskripsi, harga, fasilitas, status kamar)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## 🗂️ Desain _Database_
+Contoh:
+1. Tabel users
+   * id INT
+   * nama VARCHAR
+   * email VARCHAR
+   * password VARCHAR
+   * role ENUM (admin, pemilik, pencari)
+   * created_at TIMESTAMP
 
-## Contributing
+2. Tabel kos
+   * id INT
+   * pemilik_id INT (FK ke users)
+   * nama_kos VARCHAR
+   * alamat TEXT
+   * harga DECIMAL
+   * deskripsi TEXT
+   * created_at TIMESTAMP
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+3. Tabel detail_kos
+   * id INT
+   * kos_id INT (FK ke kos)
+   * fasilitas TEXT
+   * foto VARCHAR
+   * status_kamar ENUM (tersedia, penuh)
+4. Tabel booking
+   * id INT
+   * user_id INT (FK ke users)
+   * kos_id INT (FK ke kos)
+   * tanggal_booking DATE
+   * status ENUM (pending, diterima, ditolak)
