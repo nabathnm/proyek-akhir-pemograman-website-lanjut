@@ -48,24 +48,32 @@ Alur 3: Melihat Detail Kos
 2. Pengguna memilih kos dari daftar
 3. Sistem menampilkan detail kos (foto, deskripsi, harga, fasilitas, status kamar)
 
-## 🗂️ Desain _Database_
-Contoh:
+## 🗂️ Desain Database
+
 1. Tabel users
    * id INT
    * nama VARCHAR
    * email VARCHAR
    * password VARCHAR
    * role ENUM (admin, pemilik, pencari)
+   * no_telepon VARCHAR
    * created_at TIMESTAMP
+   * updated_at TIMESTAMP
 
 2. Tabel kos
    * id INT
    * pemilik_id INT (FK ke users)
    * nama_kos VARCHAR
    * alamat TEXT
+   * kota VARCHAR
+   * kecamatan VARCHAR
+   * tipe_kos ENUM (putra, putri, campur)
    * harga DECIMAL
+   * periode_harga ENUM (bulan, tahun)
+   * jumlah_kamar INT
    * deskripsi TEXT
    * created_at TIMESTAMP
+   * updated_at TIMESTAMP
 
 3. Tabel detail_kos
    * id INT
@@ -73,9 +81,29 @@ Contoh:
    * fasilitas TEXT
    * foto VARCHAR
    * status_kamar ENUM (tersedia, penuh)
+   * updated_at TIMESTAMP
+
 4. Tabel booking
    * id INT
    * user_id INT (FK ke users)
    * kos_id INT (FK ke kos)
    * tanggal_booking DATE
+   * tanggal_mulai DATE
+   * tanggal_selesai DATE
+   * pesan TEXT
    * status ENUM (pending, diterima, ditolak)
+   * updated_at TIMESTAMP
+
+5. Tabel foto_kos
+   * id INT
+   * kos_id INT (FK ke kos)
+   * url_foto VARCHAR
+   * urutan INT
+
+6. Tabel fasilitas
+   * id INT
+   * nama_fasilitas VARCHAR
+
+7. Tabel kos_fasilitas
+   * kos_id INT (FK ke kos)
+   * fasilitas_id INT (FK ke fasilitas)
