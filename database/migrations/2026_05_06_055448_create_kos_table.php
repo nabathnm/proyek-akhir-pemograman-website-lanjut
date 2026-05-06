@@ -6,20 +6,27 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('kos', function (Blueprint $table) {
             $table->id();
+
+            // relasi ke user (admin)
+            $table->foreignId('user_id')
+                  ->constrained()
+                  ->onDelete('cascade');
+
+            $table->string('nama_kos');
+            $table->text('alamat');
+            $table->text('deskripsi')->nullable();
+
+            // simpan path gambar
+            $table->string('foto')->nullable();
+
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('kos');
