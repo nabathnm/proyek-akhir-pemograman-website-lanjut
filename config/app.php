@@ -123,4 +123,14 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Development: skip auth untuk rute pemilik
+    |--------------------------------------------------------------------------
+    |
+    | Hanya berlaku saat APP_ENV=local. Jangan aktifkan di production.
+    |
+    */
+    'dev_skip_pemilik_auth' => (bool) env('DEV_SKIP_PEMILIK_AUTH', false),
+
 ];

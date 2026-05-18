@@ -13,45 +13,24 @@ class Kamar extends Model
     protected $table = 'kamar';
 
     protected $fillable = [
-        'kos_id',
+        'kosan_id',
         'nama_kamar',
         'harga',
         'fasilitas',
-        'status'
+        'status',
     ];
 
     protected $casts = [
         'harga' => 'integer',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | RELATIONSHIPS
-    |--------------------------------------------------------------------------
-    */
-
-    // kamar milik kos
-    public function kos(): BelongsTo
+    public function kosan(): BelongsTo
     {
-        return $this->belongsTo(Kos::class);
+        return $this->belongsTo(Kosan::class);
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | CONSTANT (biar clean)
-    |--------------------------------------------------------------------------
-    */
 
     const STATUS_KOSONG = 'kosong';
     const STATUS_TERISI = 'terisi';
-
-    /*
-    |--------------------------------------------------------------------------
-    | HELPER METHOD
-    |--------------------------------------------------------------------------
-    */
 
     public function isKosong(): bool
     {
