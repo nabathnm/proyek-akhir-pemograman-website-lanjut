@@ -4,62 +4,56 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Kosan extends Model
 {
     use HasFactory;
 
+    protected $table = 'kos';
+
     protected $fillable = [
         'user_id',
-        'nama_kosan',
-        'deskripsi',
+        'nama_kos',
         'alamat',
-        'kota',
-        'harga_per_bulan',
-        'jumlah_kamar',
-        'kamar_tersedia',
-        'tipe',
-        'fasilitas',
-        'status',
+        'deskripsi',
+        'foto'
     ];
 
     protected $casts = [
-        'fasilitas' => 'array',
-        'harga_per_bulan' => 'integer',
-        'jumlah_kamar' => 'integer',
-        'kamar_tersedia' => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
-    public function pemilik(): BelongsTo
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONSHIPS
+    |--------------------------------------------------------------------------
+    */
+
+    // 1 kos punya banyak kamar
+    public function kamar(): HasMany
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->hasMany(Kamar::class);
     }
 
+    // kos dimiliki oleh user (admin)
     public function user(): BelongsTo
     {
-        return $this->pemilik();
+        return $this->belongsTo(User::class);
     }
 
-    public function fotos(): HasMany
-    {
-        return $this->hasMany(FotoKosan::class);
-    }
+    /*
+    |--------------------------------------------------------------------------
+    | ACCESSOR (opsional tapi bagus)
+    |--------------------------------------------------------------------------
+    */
 
-    public function fotoUtama(): HasOne
+    // contoh: ambil jumlah kamar
+    public function getTotalKamarAttribute(): int
     {
-        return $this->hasOne(FotoKosan::class)->where('is_utama', true);
-    }
-
-    public function pemesanans(): HasMany
-    {
-        return $this->hasMany(Pemesanan::class);
-    }
-
-    public function ulasans(): HasMany
-    {
-        return $this->hasMany(Ulasan::class);
+        return $this->kamar()->count();
     }
 }
+
