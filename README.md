@@ -37,12 +37,15 @@ Website Manajemen Kosan Kota Malang adalah platform berbasis web yang memudahkan
    cp .env.example .env
    php artisan key:generate
    php artisan migrate
+   php artisan db:seed
    ```
 3. Build asset & jalankan server
    ```bash
    npm run build
    php artisan serve
    ```
+
+Catatan: admin default dibuat dari env (`ADMIN_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`) saat `db:seed`.
 
 ## 🔄 Alur Sistem
 

@@ -46,9 +46,11 @@ class AuthController extends Controller
             return response()->json($validator->errors()->toJson(), 400);
         }
 
+        $role = $request->role === 'pemilik' ? 'pemilik' : 'user';
+
         $user = User::create(array_merge(
                     $validator->validated(),
-                    ['password' => Hash::make($request->password), 'role' => $request->role ?? 'user']
+                    ['password' => Hash::make($request->password), 'role' => $role]
                 ));
 
         return response()->json([

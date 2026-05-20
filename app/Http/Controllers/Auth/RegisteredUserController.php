@@ -37,11 +37,13 @@ class RegisteredUserController extends Controller
             'role'     => ['required', 'in:user,pemilik'],
         ]);
 
+        $role = $request->role === 'pemilik' ? 'pemilik' : 'user';
+
         $user = User::create([
             'nama'     => $request->nama,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
-            'role'     => $request->role,
+            'role'     => $role,
         ]);
 
         event(new Registered($user));

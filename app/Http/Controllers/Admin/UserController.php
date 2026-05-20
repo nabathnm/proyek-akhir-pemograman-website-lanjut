@@ -47,6 +47,10 @@ class UserController extends Controller
             'no_telepon' => ['nullable', 'string', 'max:50'],
         ]);
 
+        if ($data['role'] === 'admin' && User::where('role', 'admin')->exists()) {
+            return back()->withInput()->with('error', 'Admin hanya boleh satu akun.');
+        }
+
         $data['password'] = Hash::make($data['password']);
 
         User::create($data);
@@ -68,6 +72,10 @@ class UserController extends Controller
             'role' => ['required', 'in:admin,pemilik,user'],
             'no_telepon' => ['nullable', 'string', 'max:50'],
         ]);
+
+        if ($data['role'] === 'admin' && User::where('role', 'admin')->where('id', '!=', $user->id)->exists()) {
+            return back()->withInput()->with('error', 'Admin hanya boleh satu akun.');
+        }
 
         $user->fill([
             'nama' => $data['nama'],
