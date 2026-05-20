@@ -26,6 +26,24 @@ Website Manajemen Kosan Kota Malang adalah platform berbasis web yang memudahkan
 | Pemilik Kos | Mengelola kosan yang dimiliki    |
 | Pencari Kos | Melihat dan memesan kosan        |
 
+## ▶️ Cara Menjalankan (Dev)
+1. Install dependency
+   ```bash
+   composer install
+   npm install
+   ```
+2. Siapkan environment & database
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   php artisan migrate
+   ```
+3. Build asset & jalankan server
+   ```bash
+   npm run build
+   php artisan serve
+   ```
+
 ## 🔄 Alur Sistem
 
 Alur 1: Registrasi dan Login Pengguna
