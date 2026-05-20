@@ -39,7 +39,7 @@
             <section class="nb-card p-5 md:p-6">
                 <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <h3 class="text-2xl font-black leading-none md:text-3xl">Kosan Terbaru</h3>
-                    <a href="{{ route('pemilik.kosan.index') }}" class="nb-btn w-full md:w-auto">Lihat Semua</a>
+                    <a href="{{ route('pemilik.kosan.index') }}" class="nb-btn">Lihat Semua</a>
                 </div>
 
                 @if(isset($kosanTerbaru) && $kosanTerbaru->count())

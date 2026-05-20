@@ -165,6 +165,7 @@ textarea:focus-visible {
     border: 2px solid transparent;
     font-weight: 700;
     color: var(--nb-text);
+    white-space: nowrap;
 }
 
 .nb-nav-link:hover {
@@ -175,6 +176,54 @@ textarea:focus-visible {
 .nb-nav-link.is-active {
     border-color: var(--nb-border);
     background: var(--nb-secondary);
+}
+
+.nb-nav-toggle {
+    display: inline-flex;
+}
+
+.nb-nav-menu {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nb-nav-menu.is-open {
+    display: flex;
+}
+
+@media (max-width: 639px) {
+    .nb-nav-menu .nb-nav-link,
+    .nb-nav-menu .nb-btn {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .nb-nav-menu form {
+        width: 100%;
+    }
+}
+
+@media (min-width: 640px) {
+    .nb-nav-toggle {
+        display: none;
+    }
+
+    .nb-nav-menu {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        overflow-x: auto;
+        scrollbar-width: thin;
+    }
+
+    .nb-nav-menu form {
+        display: inline-flex;
+        align-items: center;
+    }
 }
 
 .nb-flash {

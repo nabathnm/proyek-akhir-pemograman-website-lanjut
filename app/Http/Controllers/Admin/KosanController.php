@@ -1,52 +1,42 @@
 <?php
 
-namespace App\Http\Controllers\Pemilik;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Kosan;
 use App\Models\Fasilitas;
 use App\Models\FotoKosan;
+use App\Models\Kosan;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class KosanController extends Controller
 {
-    public function dashboard()
-    {
-        $kosanIds = Kosan::where('user_id', Auth::id())->pluck('id');
-
-        $totalKosan = $kosanIds->count();
-        $totalKamarTersedia = Kosan::whereIn('id', $kosanIds)->sum('kamar_tersedia');
-        $totalPemesanan = \App\Models\Pemesanan::whereIn('kosan_id', $kosanIds)->count();
-        $pemesananPending = \App\Models\Pemesanan::whereIn('kosan_id', $kosanIds)->where('status', 'pending')->count();
-        $kosanTerbaru = Kosan::where('user_id', Auth::id())->with('fotoUtama')->latest()->take(8)->get();
-
-        return view('pemilik.dashboard', compact(
-            'totalKosan',
-            'totalKamarTersedia',
-            'totalPemesanan',
-            'pemesananPending',
-            'kosanTerbaru'
-        ));
-    }
-
     public function index()
     {
-        $kosans = Kosan::where('user_id', Auth::id())->with('fotoUtama')->get();
-        return view('pemilik.kosan.index', compact('kosans'));
+        $kosans = Kosan::with(['fotoUtama', 'pemilik'])
+            ->latest()
+            ->paginate(12);
+
+        return view('admin.kosan.index', compact('kosans'));
     }
 
     public function create()
     {
+        $pemilikList = User::where('role', 'pemilik')->orderBy('nama')->get();
         $fasilitasList = Fasilitas::listForForm();
 
-        return view('pemilik.kosan.create', compact('fasilitasList'));
+        return view('admin.kosan.create', compact('pemilikList', 'fasilitasList'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
+            'user_id' => [
+                'required',
+                Rule::exists('users', 'id')->where('role', 'pemilik'),
+            ],
             'nama_kosan' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'alamat' => 'required|string',
@@ -55,12 +45,13 @@ class KosanController extends Controller
             'jumlah_kamar' => 'required|integer',
             'kamar_tersedia' => 'required|integer',
             'tipe' => 'required|in:putra,putri,campur',
+            'status' => 'required|in:aktif,nonaktif',
             'fasilitas' => 'nullable|array',
-            'fotos.*' => 'image|mimes:jpeg,png,jpg,gif|max:10240'
+            'fotos.*' => 'image|mimes:jpeg,png,jpg,gif|max:10240',
         ]);
 
         $kosan = Kosan::create([
-            'user_id' => Auth::id(),
+            'user_id' => $request->user_id,
             'nama_kosan' => $request->nama_kosan,
             'deskripsi' => $request->deskripsi,
             'alamat' => $request->alamat,
@@ -70,7 +61,7 @@ class KosanController extends Controller
             'kamar_tersedia' => $request->kamar_tersedia,
             'tipe' => $request->tipe,
             'fasilitas' => $request->fasilitas ?? [],
-            'status' => 'aktif'
+            'status' => $request->status,
         ]);
 
         if ($request->hasFile('fotos')) {
@@ -80,42 +71,42 @@ class KosanController extends Controller
                 FotoKosan::create([
                     'kosan_id' => $kosan->id,
                     'foto' => $path,
-                    'is_utama' => $is_utama
+                    'is_utama' => $is_utama,
                 ]);
-                $is_utama = false; // Only the first photo is set as utama
+                $is_utama = false;
             }
         }
 
-        return redirect()->route('pemilik.kosan.index')->with('success', 'Kosan berhasil ditambahkan.');
+        return redirect()->route('admin.kosan.index')->with('success', 'Kosan berhasil ditambahkan.');
     }
 
     public function show(Kosan $kosan)
     {
-        if ($kosan->user_id !== Auth::id())
-            abort(403);
-        $kosan->load('fotos');
-        return view('pemilik.kosan.show', compact('kosan'));
+        $kosan->load(['fotos', 'pemilik']);
+
+        return view('admin.kosan.show', compact('kosan'));
     }
 
     public function edit(Kosan $kosan)
     {
-        if ($kosan->user_id !== Auth::id())
-            abort(403);
+        $kosan->load(['fotos', 'pemilik']);
 
+        $pemilikList = User::where('role', 'pemilik')->orderBy('nama')->get();
         $fasilitasList = array_values(array_unique(array_merge(
             Fasilitas::listForForm(),
             $kosan->fasilitas ?? []
         )));
 
-        return view('pemilik.kosan.edit', compact('kosan', 'fasilitasList'));
+        return view('admin.kosan.edit', compact('kosan', 'pemilikList', 'fasilitasList'));
     }
 
     public function update(Request $request, Kosan $kosan)
     {
-        if ($kosan->user_id !== Auth::id())
-            abort(403);
-
         $request->validate([
+            'user_id' => [
+                'required',
+                Rule::exists('users', 'id')->where('role', 'pemilik'),
+            ],
             'nama_kosan' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'alamat' => 'required|string',
@@ -124,14 +115,16 @@ class KosanController extends Controller
             'jumlah_kamar' => 'required|integer',
             'kamar_tersedia' => 'required|integer',
             'tipe' => 'required|in:putra,putri,campur',
+            'status' => 'required|in:aktif,nonaktif',
             'fasilitas' => 'nullable|array',
             'fotos.*' => 'image|mimes:jpeg,png,jpg,gif|max:10240',
             'hapus_fotos' => 'nullable|array',
             'hapus_fotos.*' => 'exists:foto_kosans,id',
-            'foto_utama_id' => 'nullable|exists:foto_kosans,id'
+            'foto_utama_id' => 'nullable|exists:foto_kosans,id',
         ]);
 
         $kosan->update([
+            'user_id' => $request->user_id,
             'nama_kosan' => $request->nama_kosan,
             'deskripsi' => $request->deskripsi,
             'alamat' => $request->alamat,
@@ -141,9 +134,9 @@ class KosanController extends Controller
             'kamar_tersedia' => $request->kamar_tersedia,
             'tipe' => $request->tipe,
             'fasilitas' => $request->fasilitas ?? [],
+            'status' => $request->status,
         ]);
 
-        // 1. Delete selected photos
         if ($request->has('hapus_fotos')) {
             $fotosToDelete = FotoKosan::whereIn('id', $request->hapus_fotos)
                 ->where('kosan_id', $kosan->id)
@@ -154,13 +147,11 @@ class KosanController extends Controller
             }
         }
 
-        // 2. Set main photo
-        if ($request->has('foto_utama_id') && !in_array($request->foto_utama_id, $request->hapus_fotos ?? [])) {
+        if ($request->has('foto_utama_id') && ! in_array($request->foto_utama_id, $request->hapus_fotos ?? [], true)) {
             $kosan->fotos()->update(['is_utama' => false]);
             $kosan->fotos()->where('id', $request->foto_utama_id)->update(['is_utama' => true]);
         }
 
-        // 3. Upload new photos
         if ($request->hasFile('fotos')) {
             $is_utama = $kosan->fotos()->where('is_utama', true)->count() === 0;
             foreach ($request->file('fotos') as $foto) {
@@ -168,31 +159,28 @@ class KosanController extends Controller
                 FotoKosan::create([
                     'kosan_id' => $kosan->id,
                     'foto' => $path,
-                    'is_utama' => $is_utama
+                    'is_utama' => $is_utama,
                 ]);
                 $is_utama = false;
             }
         }
 
-        // Ensure there is at least one main photo if any photos exist
         if ($kosan->fotos()->count() > 0 && $kosan->fotos()->where('is_utama', true)->count() === 0) {
             $firstFoto = $kosan->fotos()->first();
             $firstFoto->update(['is_utama' => true]);
         }
 
-        return redirect()->route('pemilik.kosan.index')->with('success', 'Kosan berhasil diupdate.');
+        return redirect()->route('admin.kosan.index')->with('success', 'Kosan berhasil diperbarui.');
     }
 
     public function destroy(Kosan $kosan)
     {
-        if ($kosan->user_id !== Auth::id())
-            abort(403);
-
         foreach ($kosan->fotos as $foto) {
             Storage::disk('public')->delete($foto->foto);
         }
+
         $kosan->delete();
 
-        return redirect()->route('pemilik.kosan.index')->with('success', 'Kosan berhasil dihapus.');
+        return redirect()->route('admin.kosan.index')->with('success', 'Kosan berhasil dihapus.');
     }
 }

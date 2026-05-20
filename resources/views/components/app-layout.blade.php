@@ -11,55 +11,91 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="min-h-screen antialiased">
-    <nav class="nb-nav sticky top-0 z-50">
+    <nav class="nb-nav sticky top-0 z-50" x-data="{ open: false }">
         <div class="nb-shell py-3">
-            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <a href="{{ url('/') }}" class="inline-flex items-center gap-2 text-2xl font-black tracking-tight md:text-3xl">
-                    <span aria-hidden="true">▦</span> EasyKos
-                </a>
-                <div class="flex flex-wrap items-stretch gap-2 md:items-center md:justify-end">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex items-center justify-between gap-3">
+                    <a href="{{ url('/') }}" class="inline-flex items-center gap-2 text-2xl font-black tracking-tight md:text-3xl">
+                        <span aria-hidden="true">▦</span> EasyKos
+                    </a>
+                    <button type="button"
+                            class="nb-btn nb-nav-toggle py-2 px-3 text-base"
+                            @click="open = !open"
+                            :aria-expanded="open.toString()"
+                            aria-controls="main-nav">
+                        Menu
+                    </button>
+                </div>
+                <div id="main-nav"
+                     class="nb-nav-menu mt-2"
+                     :class="open ? 'is-open' : ''">
                     <a href="{{ route('home') }}"
-                       class="nb-nav-link w-full justify-start md:w-auto md:justify-center {{ request()->routeIs('home', 'kosan.*') ? 'is-active' : '' }}">
+                       class="nb-nav-link {{ request()->routeIs('home', 'kosan.*') ? 'is-active' : '' }}">
                         Beranda
                     </a>
 
                     @auth
-                        @if(Auth::user()->role === 'pemilik')
+                        @if(Auth::user()->role === 'admin')
+                            <a href="{{ route('admin.dashboard') }}"
+                               class="nb-nav-link {{ request()->routeIs('admin.dashboard') ? 'is-active' : '' }}">
+                                Admin
+                            </a>
+                            <a href="{{ route('admin.users.index') }}"
+                               class="nb-nav-link {{ request()->routeIs('admin.users.*') ? 'is-active' : '' }}">
+                                Users
+                            </a>
+                            <a href="{{ route('admin.kosan.index') }}"
+                               class="nb-nav-link {{ request()->routeIs('admin.kosan.*') ? 'is-active' : '' }}">
+                                Kosan
+                            </a>
+                            <a href="{{ route('admin.pemesanan.index') }}"
+                               class="nb-nav-link {{ request()->routeIs('admin.pemesanan.*') ? 'is-active' : '' }}">
+                                Pemesanan
+                            </a>
+                            <a href="{{ route('admin.ulasan.index') }}"
+                               class="nb-nav-link {{ request()->routeIs('admin.ulasan.*') ? 'is-active' : '' }}">
+                                Ulasan
+                            </a>
+                            <a href="{{ route('admin.fasilitas.index') }}"
+                               class="nb-nav-link {{ request()->routeIs('admin.fasilitas.*') ? 'is-active' : '' }}">
+                                Fasilitas
+                            </a>
+                        @elseif(Auth::user()->role === 'pemilik')
                             <a href="{{ route('pemilik.dashboard') }}"
-                               class="nb-nav-link w-full justify-start md:w-auto md:justify-center {{ request()->routeIs('pemilik.dashboard') ? 'is-active' : '' }}">
+                               class="nb-nav-link {{ request()->routeIs('pemilik.dashboard') ? 'is-active' : '' }}">
                                 Dashboard
                             </a>
                             <a href="{{ route('pemilik.kosan.index') }}"
-                               class="nb-nav-link w-full justify-start md:w-auto md:justify-center {{ request()->routeIs('pemilik.kosan.*') ? 'is-active' : '' }}">
+                               class="nb-nav-link {{ request()->routeIs('pemilik.kosan.*') ? 'is-active' : '' }}">
                                 Kosan Saya
                             </a>
                             <a href="{{ route('pemilik.pemesanan.index') }}"
-                               class="nb-nav-link w-full justify-start md:w-auto md:justify-center {{ request()->routeIs('pemilik.pemesanan.*') ? 'is-active' : '' }}">
+                               class="nb-nav-link {{ request()->routeIs('pemilik.pemesanan.*') ? 'is-active' : '' }}">
                                 Pemesanan
                             </a>
                         @else
                             <a href="{{ route('user.dashboard') }}"
-                               class="nb-nav-link w-full justify-start md:w-auto md:justify-center {{ request()->routeIs('user.*') ? 'is-active' : '' }}">
+                               class="nb-nav-link {{ request()->routeIs('user.*') ? 'is-active' : '' }}">
                                 Pesanan Saya
                             </a>
                         @endif
 
                         <a href="{{ route('profile.edit') }}"
-                           class="nb-nav-link w-full justify-start md:w-auto md:justify-center {{ request()->routeIs('profile.*') ? 'is-active' : '' }}">
+                           class="nb-nav-link {{ request()->routeIs('profile.*') ? 'is-active' : '' }}">
                             Profil
                         </a>
 
-                        <form method="POST" action="{{ route('logout') }}" class="w-full md:w-auto">
+                        <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="nb-btn nb-btn-danger w-full py-2 px-3 text-base md:w-auto">
+                            <button type="submit" class="nb-btn nb-btn-danger py-2 px-3 text-base">
                                 Keluar
                             </button>
                         </form>
                     @else
-                        <a href="{{ route('login') }}" class="nb-nav-link w-full justify-start md:w-auto md:justify-center {{ request()->routeIs('login') ? 'is-active' : '' }}">
+                        <a href="{{ route('login') }}" class="nb-nav-link {{ request()->routeIs('login') ? 'is-active' : '' }}">
                             Masuk
                         </a>
-                        <a href="{{ route('register') }}" class="nb-btn nb-btn-primary w-full py-2 px-3 text-base md:w-auto">
+                        <a href="{{ route('register') }}" class="nb-btn nb-btn-primary py-2 px-3 text-base">
                             Daftar
                         </a>
                     @endauth

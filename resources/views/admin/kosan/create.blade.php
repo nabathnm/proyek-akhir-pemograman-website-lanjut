@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex flex-wrap items-center gap-2">
-            <a href="{{ route('pemilik.kosan.index') }}" class="nb-btn py-1 px-2 text-base">Kembali</a>
+            <a href="{{ route('admin.kosan.index') }}" class="nb-btn py-1 px-2 text-base">Kembali</a>
             <span class="nb-kicker">/</span>
             <span class="text-3xl font-black leading-none">Tambah Kosan</span>
         </div>
@@ -9,8 +9,22 @@
 
     <div class="pt-6">
         <div class="nb-shell max-w-3xl">
-            <form method="POST" action="{{ route('pemilik.kosan.store') }}" enctype="multipart/form-data" class="space-y-6">
+            <form method="POST" action="{{ route('admin.kosan.store') }}" enctype="multipart/form-data" class="space-y-6">
                 @csrf
+
+                <section class="nb-card p-5 md:p-6">
+                    <h3 class="text-3xl font-black leading-none">Pemilik</h3>
+                    <div class="mt-5">
+                        <label class="nb-label">Pilih Pemilik</label>
+                        <select name="user_id" class="nb-select bg-white">
+                            <option value="">Pilih pemilik</option>
+                            @foreach($pemilikList as $pemilik)
+                                <option value="{{ $pemilik->id }}" @selected(old('user_id') == $pemilik->id)>{{ $pemilik->nama }} ({{ $pemilik->email }})</option>
+                            @endforeach
+                        </select>
+                        @error('user_id')<p class="nb-error">{{ $message }}</p>@enderror
+                    </div>
+                </section>
 
                 <section class="nb-card p-5 md:p-6">
                     <h3 class="text-3xl font-black leading-none">Informasi Kosan</h3>
@@ -23,7 +37,7 @@
 
                         <div>
                             <label class="nb-label">Deskripsi</label>
-                            <textarea name="deskripsi" rows="5" placeholder="Jelaskan tentang kosan Anda..." class="nb-textarea">{{ old('deskripsi') }}</textarea>
+                            <textarea name="deskripsi" rows="5" placeholder="Jelaskan tentang kosan..." class="nb-textarea">{{ old('deskripsi') }}</textarea>
                             @error('deskripsi')<p class="nb-error">{{ $message }}</p>@enderror
                         </div>
 
@@ -73,6 +87,15 @@
                             <input type="number" name="kamar_tersedia" value="{{ old('kamar_tersedia') }}" min="0" placeholder="5" class="nb-input">
                             @error('kamar_tersedia')<p class="nb-error">{{ $message }}</p>@enderror
                         </div>
+
+                        <div class="md:col-span-2">
+                            <label class="nb-label">Status</label>
+                            <select name="status" class="nb-select bg-white">
+                                <option value="aktif" @selected(old('status', 'aktif') === 'aktif')>Aktif</option>
+                                <option value="nonaktif" @selected(old('status') === 'nonaktif')>Nonaktif</option>
+                            </select>
+                            @error('status')<p class="nb-error">{{ $message }}</p>@enderror
+                        </div>
                     </div>
                 </section>
 
@@ -93,7 +116,7 @@
 
                 <section class="nb-card p-5 md:p-6">
                     <h3 class="text-3xl font-black leading-none">Foto Kosan</h3>
-                    <p class="nb-kicker mt-1">Upload minimal 1 foto. JPG, PNG, GIF. Maks 2MB/foto.</p>
+                    <p class="nb-kicker mt-1">Upload minimal 1 foto. JPG, PNG, GIF. Maks 10MB/foto.</p>
                     <label for="fotos" class="nb-card-soft mt-5 flex cursor-pointer flex-col items-center justify-center border-2 border-dashed border-black p-6 text-center">
                         <p class="text-2xl font-black">Pilih Foto</p>
                         <p class="mt-2 text-lg font-medium">Klik untuk unggah foto baru</p>
@@ -105,7 +128,7 @@
                 </section>
 
                 <div class="flex flex-col gap-3 md:flex-row">
-                    <a href="{{ route('pemilik.kosan.index') }}" class="nb-btn w-full md:w-auto md:flex-1">Batal</a>
+                    <a href="{{ route('admin.kosan.index') }}" class="nb-btn w-full md:w-auto md:flex-1">Batal</a>
                     <button type="submit" class="nb-btn nb-btn-primary w-full md:w-auto md:flex-1">Simpan Kosan</button>
                 </div>
             </form>

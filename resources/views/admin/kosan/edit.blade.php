@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex flex-wrap items-center gap-2">
-            <a href="{{ route('pemilik.kosan.index') }}" class="nb-btn py-1 px-2 text-base">Kembali</a>
+            <a href="{{ route('admin.kosan.index') }}" class="nb-btn py-1 px-2 text-base">Kembali</a>
             <span class="nb-kicker">/</span>
             <span class="text-3xl font-black leading-none">Edit Kosan</span>
             <span class="nb-kicker">{{ $kosan->nama_kosan }}</span>
@@ -10,9 +10,22 @@
 
     <div class="pt-6">
         <div class="nb-shell">
-            <form method="POST" action="{{ route('pemilik.kosan.update', $kosan) }}" enctype="multipart/form-data" class="space-y-6">
+            <form method="POST" action="{{ route('admin.kosan.update', $kosan) }}" enctype="multipart/form-data" class="space-y-6">
                 @csrf
                 @method('PUT')
+
+                <section class="nb-card p-5 md:p-6">
+                    <h3 class="text-3xl font-black leading-none">Pemilik</h3>
+                    <div class="mt-5">
+                        <label class="nb-label">Pilih Pemilik</label>
+                        <select name="user_id" class="nb-select bg-white">
+                            @foreach($pemilikList as $pemilik)
+                                <option value="{{ $pemilik->id }}" @selected(old('user_id', $kosan->user_id) == $pemilik->id)>{{ $pemilik->nama }} ({{ $pemilik->email }})</option>
+                            @endforeach
+                        </select>
+                        @error('user_id')<p class="nb-error">{{ $message }}</p>@enderror
+                    </div>
+                </section>
 
                 <section class="nb-card p-5 md:p-6">
                     <h3 class="text-3xl font-black leading-none">Informasi Dasar</h3>
@@ -77,6 +90,7 @@
                                 <option value="aktif" @selected(old('status', $kosan->status) === 'aktif')>Aktif</option>
                                 <option value="nonaktif" @selected(old('status', $kosan->status) === 'nonaktif')>Nonaktif</option>
                             </select>
+                            @error('status')<p class="nb-error">{{ $message }}</p>@enderror
                         </div>
                     </div>
                 </section>
@@ -137,7 +151,7 @@
                 </section>
 
                 <div class="flex gap-3">
-                    <a href="{{ route('pemilik.kosan.index') }}" class="nb-btn flex-1">Batal</a>
+                    <a href="{{ route('admin.kosan.index') }}" class="nb-btn flex-1">Batal</a>
                     <button type="submit" class="nb-btn nb-btn-primary flex-1">Simpan Perubahan</button>
                 </div>
             </form>
