@@ -1,7 +1,7 @@
 @props(['header' => null])
 
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="h-full">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,7 +10,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="min-h-screen antialiased">
+<body class="flex min-h-full flex-col antialiased">
     <nav class="nb-nav sticky top-0 z-50" x-data="{ open: false }">
         <div class="nb-shell py-3">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -128,8 +128,31 @@
         </div>
     @endif
 
-    <main class="pb-10">
+    <main class="flex-1 pb-10">
         {{ $slot }}
     </main>
+
+    <footer class="border-t-4 border-black bg-white py-10">
+        <div class="nb-shell">
+            <div class="flex flex-col items-center justify-between gap-5 md:flex-row">
+                <div>
+                    <a href="{{ url('/') }}" class="text-3xl font-black tracking-tight">
+                        ▦ EasyKos
+                    </a>
+                    <p class="mt-2 text-lg font-medium text-gray-600">
+                        Cari kosan nyaman tanpa drama.
+                    </p>
+                </div>
+                <div class="text-center md:text-right">
+                    <p class="text-lg font-black underline decoration-pink-500 decoration-4">
+                        &copy; {{ date('Y') }} EasyKos Project.
+                    </p>
+                    <p class="mt-1 font-medium text-gray-500">
+                        Malang, Indonesia
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>

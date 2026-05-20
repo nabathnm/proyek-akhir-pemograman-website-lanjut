@@ -37,6 +37,18 @@ body {
         linear-gradient(90deg, rgba(17, 24, 39, 0.05) 1px, transparent 1px) 0 0 / 20px 20px,
         linear-gradient(rgba(17, 24, 39, 0.05) 1px, transparent 1px) 0 0 / 20px 20px,
         var(--nb-surface);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+footer {
+    flex-shrink: 0;
 }
 
 a:focus-visible,
