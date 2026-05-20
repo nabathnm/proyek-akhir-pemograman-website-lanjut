@@ -10,7 +10,7 @@
     <div class="nb-card p-10 max-w-lg text-center">
         <h1 class="text-9xl font-black mb-4">404</h1>
         <p class="text-3xl font-black mb-6">Waduh! Kesasar ya?</p>
-        <p class="text-xl font-medium mb-8 text-gray-600">Halaman yang kamu cari nggak ada di sini, Jink.</p>
+        <p class="text-xl font-medium mb-8 text-gray-600">Halaman yang kamu cari nggak ada di sini.</p>
         <a href="{{ url('/') }}" class="nb-btn nb-btn-primary px-8 py-3 text-xl inline-block">
             Balik ke Beranda
         </a>

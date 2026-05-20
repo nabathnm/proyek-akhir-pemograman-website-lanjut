@@ -33,7 +33,10 @@ class KosanController extends Controller
             ->where('kamar_tersedia', '>', 0)
             ->with(['fotoUtama', 'ulasans'])
             ->latest()->paginate(12);
-        return view('user.home', compact('kosans'));
+        
+        $fasilitasList = \App\Models\Fasilitas::orderBy('nama_fasilitas')->get();
+        
+        return view('user.home', compact('kosans', 'fasilitasList'));
     }
 
     public function search(Request $request)
@@ -51,18 +54,19 @@ class KosanController extends Controller
             ->when($request->tipe, fn($q) => $q->where('tipe', $request->tipe))
             ->when($request->harga_max, fn($q) => $q->where('harga_per_bulan', '<=', $request->harga_max))
             ->when($request->fasilitas, fn($q) => $q->where(function($query) use ($request) {
-                if (is_array($request->fasilitas)) {
-                    foreach ($request->fasilitas as $f) {
-                        $query->whereJsonContains('fasilitas', $f);
-                    }
+                $fasilitas = is_array($request->fasilitas) ? $request->fasilitas : [$request->fasilitas];
+                foreach ($fasilitas as $f) {
+                    $query->whereJsonContains('fasilitas', $f);
                 }
             }))
             ->with('fotoUtama')
+            ->latest()
             ->paginate(12);
             
         $kosans->appends($request->all());
+        $fasilitasList = \App\Models\Fasilitas::orderBy('nama_fasilitas')->get();
 
-        return view('user.home', compact('kosans'));
+        return view('user.home', compact('kosans', 'fasilitasList'));
     }
 
     public function ulasan(Request $request, Kosan $kosan)

@@ -64,6 +64,12 @@ class KosanApiController extends Controller
         if ($request->filled('max_harga')) {
             $query->where('harga_per_bulan', '<=', $request->max_harga);
         }
+        if ($request->filled('fasilitas')) {
+            $fasilitas = is_array($request->fasilitas) ? $request->fasilitas : [$request->fasilitas];
+            foreach ($fasilitas as $f) {
+                $query->whereJsonContains('fasilitas', $f);
+            }
+        }
         if ($request->filled('tersedia') && $request->tersedia == 1) {
             $query->where('kamar_tersedia', '>', 0);
         }
