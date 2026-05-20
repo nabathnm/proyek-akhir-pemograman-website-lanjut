@@ -6,48 +6,44 @@
     <title>Masuk — EasyKos</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-gray-50 font-sans antialiased flex items-center justify-center px-4">
-    <div class="w-full max-w-md">
-        <div class="text-center mb-8">
-            <a href="{{ url('/') }}" class="text-3xl font-extrabold text-green-700">🏠 EasyKos</a>
-            <p class="text-gray-500 mt-2 text-sm">Masuk ke akun Anda</p>
-        </div>
+<body class="min-h-screen antialiased">
+    <div class="nb-shell min-h-screen flex items-center py-10">
+        <section class="nb-card mx-auto w-full max-w-xl p-6 md:p-8">
+            <a href="{{ url('/') }}" class="nb-kicker hover:underline">Kembali ke Landing</a>
+            <h1 class="mt-2 text-5xl font-black leading-none">Masuk</h1>
+            <p class="mt-2 text-xl font-semibold">Akses dashboard dan data kosan.</p>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <form method="POST" action="{{ route('login') }}" class="space-y-5">
+            <form method="POST" action="{{ route('login') }}" class="mt-7 space-y-5">
                 @csrf
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+                    <label class="nb-label">Email</label>
                     <input type="email" name="email" value="{{ old('email') }}" required autofocus
-                           class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
-                    @error('email')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                           class="nb-input" placeholder="nama@email.com">
+                    @error('email')<p class="nb-error">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
-                    <input type="password" name="password" required
-                           class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
-                    @error('password')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                    <label class="nb-label">Password</label>
+                    <input type="password" name="password" required class="nb-input" placeholder="••••••••">
+                    @error('password')<p class="nb-error">{{ $message }}</p>@enderror
                 </div>
 
-                <label class="flex items-center gap-2 text-sm text-gray-600">
-                    <input type="checkbox" name="remember" class="rounded border-gray-300 text-green-600">
+                <label class="inline-flex items-center gap-2 text-lg font-semibold">
+                    <input type="checkbox" name="remember" class="h-5 w-5 border-2 border-black">
                     Ingat saya
                 </label>
 
-                <button type="submit"
-                        class="w-full py-3 rounded-xl text-white font-semibold text-sm transition"
-                        style="background:linear-gradient(135deg,#16a34a,#15803d)">
+                <button type="submit" class="nb-btn nb-btn-primary w-full text-xl">
                     Masuk
                 </button>
             </form>
 
-            <p class="text-center text-sm text-gray-500 mt-6">
+            <p class="mt-6 text-lg font-medium">
                 Belum punya akun?
-                <a href="{{ route('register') }}" class="text-green-700 font-semibold hover:underline">Daftar</a>
+                <a href="{{ route('register') }}" class="font-black underline">Daftar</a>
             </p>
-        </div>
+        </section>
     </div>
 </body>
 </html>
