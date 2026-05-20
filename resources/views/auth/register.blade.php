@@ -6,66 +6,63 @@
     <title>Daftar — EasyKos</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-gray-50 font-sans antialiased flex items-center justify-center px-4 py-8">
-    <div class="w-full max-w-md">
-        <div class="text-center mb-8">
-            <a href="{{ url('/') }}" class="text-3xl font-extrabold text-green-700">🏠 EasyKos</a>
-            <p class="text-gray-500 mt-2 text-sm">Buat akun baru</p>
-        </div>
+<body class="min-h-screen antialiased">
+    <div class="nb-shell min-h-screen flex items-center py-10">
+        <section class="nb-card mx-auto w-full max-w-2xl p-6 md:p-8">
+            <a href="{{ url('/') }}" class="nb-kicker hover:underline">Kembali ke Landing</a>
+            <h1 class="mt-2 text-5xl font-black leading-none">Daftar Akun</h1>
+            <p class="mt-2 text-xl font-semibold">Pilih role, isi data inti, langsung pakai.</p>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <form method="POST" action="{{ route('register') }}" class="space-y-4">
+            <form method="POST" action="{{ route('register') }}" class="mt-7 space-y-4">
                 @csrf
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Daftar sebagai</label>
+                    <label class="nb-label">Daftar sebagai</label>
                     <select name="role" required
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-400">
+                            class="nb-select">
                         <option value="user" @selected(old('role', request('role')) === 'user')>Pencari Kos</option>
                         <option value="pemilik" @selected(old('role', request('role')) === 'pemilik')>Pemilik Kos</option>
                     </select>
-                    @error('role')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                    @error('role')<p class="nb-error">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap</label>
+                    <label class="nb-label">Nama Lengkap</label>
                     <input type="text" name="nama" value="{{ old('nama') }}" required
-                           class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
-                    @error('nama')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                           class="nb-input" placeholder="Nama kamu">
+                    @error('nama')<p class="nb-error">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+                    <label class="nb-label">Email</label>
                     <input type="email" name="email" value="{{ old('email') }}" required
-                           class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
-                    @error('email')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                           class="nb-input" placeholder="nama@email.com">
+                    @error('email')<p class="nb-error">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+                    <label class="nb-label">Password</label>
                     <input type="password" name="password" required
-                           class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
-                    @error('password')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                           class="nb-input" placeholder="Minimal 8 karakter">
+                    @error('password')<p class="nb-error">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Konfirmasi Password</label>
+                    <label class="nb-label">Konfirmasi Password</label>
                     <input type="password" name="password_confirmation" required
-                           class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
+                           class="nb-input" placeholder="Ulangi password">
                 </div>
 
-                <button type="submit"
-                        class="w-full py-3 rounded-xl text-white font-semibold text-sm transition mt-2"
-                        style="background:linear-gradient(135deg,#16a34a,#15803d)">
+                <button type="submit" class="nb-btn nb-btn-primary w-full text-xl mt-2">
                     Daftar
                 </button>
             </form>
 
-            <p class="text-center text-sm text-gray-500 mt-6">
+            <p class="mt-6 text-lg font-medium">
                 Sudah punya akun?
-                <a href="{{ route('login') }}" class="text-green-700 font-semibold hover:underline">Masuk</a>
+                <a href="{{ route('login') }}" class="font-black underline">Masuk</a>
             </p>
-        </div>
+        </section>
     </div>
 </body>
 </html>

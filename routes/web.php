@@ -7,13 +7,8 @@ use App\Http\Controllers\Pemilik\PemesananController as PemilikPemesananControll
 use App\Http\Controllers\User\KosanController as UserKosanController;
 use App\Http\Controllers\User\PemesananController as UserPemesananController;
 
-// Halaman utama: tampilkan choose jika tamu, redirect ke home jika sudah login
+// Halaman utama (landing) untuk tamu maupun user yang sudah login
 Route::get('/', function () {
-    if (Auth::check()) {
-        return Auth::user()->role === 'pemilik'
-            ? redirect()->route('pemilik.dashboard')
-            : redirect()->route('home');
-    }
     return view('auth.choose');
 })->name('welcome');
 

@@ -1,121 +1,108 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-bold text-xl text-gray-800">Kelola Pemesanan</h2>
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="nb-kicker">Pemilik</span>
+            <span class="nb-kicker">/</span>
+            <h2 class="text-4xl font-black leading-none">Pemesanan Masuk</h2>
+        </div>
     </x-slot>
 
-    <div class="py-8">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-
-            {{-- Flash Messages --}}
-            @if(session('success'))
-                <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm flex items-center gap-2">
-                    <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    {{ session('success') }}
+    <div class="pt-6">
+        <div class="nb-shell space-y-6">
+            <section class="nb-card p-5 md:p-6">
+                <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                    <div>
+                        <p class="nb-kicker">Daftar pengajuan masuk</p>
+                        <h3 class="mt-2 text-3xl font-black leading-none">Kelola pesanan satu per satu</h3>
+                    </div>
+                    <p class="nb-kicker max-w-xl md:text-right">
+                        Cek status, buka detail, lalu setujui atau tolak pengajuan dari calon penyewa.
+                    </p>
                 </div>
-            @endif
-            @if(session('error'))
-                <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
-                    {{ session('error') }}
-                </div>
-            @endif
+            </section>
 
             @if($pemesanans->count())
                 <div class="space-y-4">
                     @foreach($pemesanans as $pemesanan)
                         @php
-                            $statusColors = [
-                                'pending'    => 'bg-yellow-100 text-yellow-700',
-                                'disetujui'  => 'bg-green-100 text-green-700',
-                                'ditolak'    => 'bg-red-100 text-red-700',
-                                'dibatalkan' => 'bg-gray-100 text-gray-500',
+                            $statusConfig = [
+                                'pending' => ['label' => 'Menunggu', 'tone' => 'bg-yellow-200'],
+                                'disetujui' => ['label' => 'Disetujui', 'tone' => 'bg-green-200'],
+                                'ditolak' => ['label' => 'Ditolak', 'tone' => 'bg-red-200'],
+                                'dibatalkan' => ['label' => 'Dibatalkan', 'tone' => 'bg-gray-200'],
                             ];
-                            $statusLabels = [
-                                'pending'    => 'Menunggu',
-                                'disetujui'  => 'Disetujui',
-                                'ditolak'    => 'Ditolak',
-                                'dibatalkan' => 'Dibatalkan',
-                            ];
+                            $sc = $statusConfig[$pemesanan->status] ?? $statusConfig['pending'];
                         @endphp
-                        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                            <div class="flex flex-col sm:flex-row">
-                                {{-- Foto --}}
-                                <div class="sm:w-36 shrink-0">
+
+                        <article class="nb-card p-4 md:p-5">
+                            <div class="grid gap-4 md:grid-cols-[160px_minmax(0,1fr)_auto] md:items-start">
+                                <div class="h-36 overflow-hidden border-2 border-black bg-gray-200">
                                     @if($pemesanan->kosan && $pemesanan->kosan->fotoUtama)
                                         <img src="{{ asset('storage/' . $pemesanan->kosan->fotoUtama->foto) }}"
                                              alt="{{ $pemesanan->kosan->nama_kosan }}"
-                                             class="w-full h-28 sm:h-full object-cover">
-                                    @else
-                                        <div class="w-full h-28 sm:h-full bg-gray-100 flex items-center justify-center text-gray-300">
-                                            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M14 8h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                            </svg>
-                                        </div>
+                                             class="h-full w-full object-cover">
                                     @endif
                                 </div>
 
-                                {{-- Info --}}
-                                <div class="flex-1 p-5">
-                                    <div class="flex items-start justify-between gap-3 mb-3">
-                                        <div>
-                                            <h3 class="font-bold text-gray-900">{{ $pemesanan->kosan->nama_kosan ?? '-' }}</h3>
-                                            <p class="text-xs text-gray-500 mt-0.5">Oleh: <span class="font-semibold text-gray-700">{{ $pemesanan->user->name ?? '-' }}</span> — {{ $pemesanan->user->email ?? '' }}</p>
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-start gap-3">
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-3xl font-black leading-none">{{ $pemesanan->kosan->nama_kosan ?? '-' }}</p>
+                                            <p class="mt-2 text-lg font-medium">
+                                                {{ $pemesanan->user->nama ?? '-' }}
+                                                <span class="nb-kicker">/</span>
+                                                {{ $pemesanan->user->email ?? '-' }}
+                                            </p>
                                         </div>
-                                        <span class="text-xs px-2.5 py-1 rounded-full font-semibold shrink-0 {{ $statusColors[$pemesanan->status] ?? 'bg-gray-100 text-gray-500' }}">
-                                            {{ $statusLabels[$pemesanan->status] ?? ucfirst($pemesanan->status) }}
+                                        <span class="nb-kicker border-2 border-black px-2 py-1 {{ $sc['tone'] }}">
+                                            {{ $sc['label'] }}
                                         </span>
                                     </div>
 
-                                    <div class="flex flex-wrap items-center gap-4 text-xs text-gray-500 mb-4">
-                                        <span class="flex items-center gap-1">
-                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                            </svg>
-                                            Masuk: {{ \Carbon\Carbon::parse($pemesanan->tanggal_masuk)->translatedFormat('d M Y') }}
-                                        </span>
-                                        <span>{{ $pemesanan->durasi_bulan }} bulan</span>
-                                        <span class="font-bold text-green-700">Rp {{ number_format($pemesanan->total_harga, 0, ',', '.') }}</span>
-                                    </div>
-
-                                    {{-- Actions --}}
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <a href="{{ route('pemilik.pemesanan.show', $pemesanan) }}"
-                                           class="text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 font-semibold transition">
-                                            Detail
-                                        </a>
-                                        @if($pemesanan->status === 'pending')
-                                            <form method="POST" action="{{ route('pemilik.pemesanan.setujui', $pemesanan) }}" class="inline">
-                                                @csrf @method('PATCH')
-                                                <button type="submit" class="text-xs px-3 py-1.5 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition">
-                                                    ✓ Setujui
-                                                </button>
-                                            </form>
-                                            <form method="POST" action="{{ route('pemilik.pemesanan.tolak', $pemesanan) }}" class="inline"
-                                                  onsubmit="return confirm('Yakin ingin menolak pemesanan ini?')">
-                                                @csrf @method('PATCH')
-                                                <button type="submit" class="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-600 font-semibold hover:bg-red-100 transition border border-red-200">
-                                                    ✗ Tolak
-                                                </button>
-                                            </form>
-                                        @endif
+                                    <div class="mt-4 grid gap-2 text-lg font-medium md:grid-cols-2">
+                                        <div class="nb-card-soft px-3 py-2">
+                                            <span class="nb-kicker block">Tanggal Masuk</span>
+                                            <span class="font-black">{{ \Carbon\Carbon::parse($pemesanan->tanggal_masuk)->translatedFormat('d M Y') }}</span>
+                                        </div>
+                                        <div class="nb-card-soft px-3 py-2">
+                                            <span class="nb-kicker block">Durasi</span>
+                                            <span class="font-black">{{ $pemesanan->durasi_bulan }} bulan</span>
+                                        </div>
+                                        <div class="nb-card-soft px-3 py-2 md:col-span-2">
+                                            <span class="nb-kicker block">Total Biaya</span>
+                                            <span class="font-black">Rp {{ number_format($pemesanan->total_harga, 0, ',', '.') }}</span>
+                                        </div>
                                     </div>
                                 </div>
+
+                                <div class="flex min-w-[180px] flex-col gap-2 md:items-stretch">
+                                    <a href="{{ route('pemilik.pemesanan.show', $pemesanan) }}" class="nb-btn w-full py-2 text-base">Detail</a>
+                                    @if($pemesanan->status === 'pending')
+                                        <form method="POST" action="{{ route('pemilik.pemesanan.setujui', $pemesanan) }}">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="nb-btn nb-btn-primary w-full py-2 text-base">Setujui</button>
+                                        </form>
+                                        <form method="POST" action="{{ route('pemilik.pemesanan.tolak', $pemesanan) }}" onsubmit="return confirm('Yakin ingin menolak pemesanan ini?')">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="nb-btn nb-btn-danger w-full py-2 text-base">Tolak</button>
+                                        </form>
+                                    @endif
+                                </div>
                             </div>
-                        </div>
+                        </article>
                     @endforeach
                 </div>
 
-                <div class="mt-6">
+                <div class="nb-card mt-6 p-4">
                     {{ $pemesanans->links() }}
                 </div>
             @else
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
-                    <div class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mx-auto mb-4">
-                    </div>
-                    <h3 class="font-bold text-gray-800 text-lg mb-1">Belum Ada Pemesanan</h3>
-                    <p class="text-sm text-gray-500">Belum ada pengguna yang mengajukan pemesanan untuk kosan Anda.</p>
-                </div>
+                <section class="nb-card p-10 text-center">
+                    <p class="text-4xl font-black leading-none">Belum Ada Pemesanan</p>
+                    <p class="mt-3 text-lg font-medium">Belum ada pengajuan untuk kosan Anda.</p>
+                </section>
             @endif
         </div>
     </div>
