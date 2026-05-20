@@ -8,14 +8,20 @@ use App\Models\Pemesanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use OpenApi\Attributes as OA;
 
 class PemesananApiController extends Controller
 {
-    /**
-     * GET /api/pemesanan
-     * Daftar pemesanan milik user yang login.
-     * Pemilik kosan: melihat semua pemesanan untuk kosan miliknya.
-     */
+    #[OA\Get(
+        path: "/api/pemesanan",
+        summary: "Daftar pemesanan milik user yang login",
+        tags: ["Pemesanan"],
+        security: [["bearerAuth" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "Berhasil mengambil daftar pemesanan"),
+            new OA\Response(response: 401, description: "Unauthenticated")
+        ]
+    )]
     public function index()
     {
         $user = Auth::user();
@@ -42,10 +48,29 @@ class PemesananApiController extends Controller
         ]);
     }
 
-    /**
-     * POST /api/pemesanan
-     * Buat pemesanan baru.
-     */
+    #[OA\Post(
+        path: "/api/pemesanan",
+        summary: "Buat pemesanan baru",
+        tags: ["Pemesanan"],
+        security: [["bearerAuth" => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["kosan_id", "tanggal_masuk", "durasi_bulan"],
+                properties: [
+                    new OA\Property(property: "kosan_id", type: "integer", example: 1),
+                    new OA\Property(property: "tanggal_masuk", type: "string", format: "date", example: "2024-06-01"),
+                    new OA\Property(property: "durasi_bulan", type: "integer", minimum: 1, maximum: 24, example: 3),
+                    new OA\Property(property: "catatan", type: "string", example: "Mohon segera diproses.")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: "Pemesanan berhasil dibuat"),
+            new OA\Response(response: 400, description: "Kamar penuh atau sudah ada pemesanan aktif"),
+            new OA\Response(response: 422, description: "Validation error")
+        ]
+    )]
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -104,10 +129,20 @@ class PemesananApiController extends Controller
         ], 201);
     }
 
-    /**
-     * GET /api/pemesanan/{id}
-     * Detail satu pemesanan.
-     */
+    #[OA\Get(
+        path: "/api/pemesanan/{id}",
+        summary: "Detail satu pemesanan",
+        tags: ["Pemesanan"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "id", in: "path", required: true, description: "ID Pemesanan", schema: new OA\Schema(type: "integer"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Berhasil mengambil detail pemesanan"),
+            new OA\Response(response: 403, description: "Forbidden"),
+            new OA\Response(response: 404, description: "Pemesanan tidak ditemukan")
+        ]
+    )]
     public function show($id)
     {
         $user = Auth::user();
@@ -140,12 +175,30 @@ class PemesananApiController extends Controller
         ]);
     }
 
-    /**
-     * PATCH /api/pemesanan/{id}
-     * Update status pemesanan.
-     * - Pemilik: bisa setujui (disetujui) atau tolak (ditolak)
-     * - User: bisa batalkan (dibatalkan) jika masih pending
-     */
+    #[OA\Patch(
+        path: "/api/pemesanan/{id}",
+        summary: "Update status pemesanan",
+        description: "Pemilik bisa setuju/tolak, User bisa batalkan",
+        tags: ["Pemesanan"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "id", in: "path", required: true, description: "ID Pemesanan", schema: new OA\Schema(type: "integer"))
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["status"],
+                properties: [
+                    new OA\Property(property: "status", type: "string", enum: ["disetujui", "ditolak", "dibatalkan"])
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: "Status berhasil diperbarui"),
+            new OA\Response(response: 400, description: "Status tidak dapat diproses"),
+            new OA\Response(response: 403, description: "Forbidden")
+        ]
+    )]
     public function update(Request $request, $id)
     {
         $pemesanan = Pemesanan::with('kosan')->find($id);
@@ -218,10 +271,20 @@ class PemesananApiController extends Controller
         ]);
     }
 
-    /**
-     * DELETE /api/pemesanan/{id}
-     * Hapus pemesanan (hanya jika pending dan milik user sendiri).
-     */
+    #[OA\Delete(
+        path: "/api/pemesanan/{id}",
+        summary: "Hapus pemesanan (hanya jika pending dan milik sendiri)",
+        tags: ["Pemesanan"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "id", in: "path", required: true, description: "ID Pemesanan", schema: new OA\Schema(type: "integer"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Pemesanan berhasil dihapus"),
+            new OA\Response(response: 400, description: "Hanya pending yang bisa dihapus"),
+            new OA\Response(response: 404, description: "Pemesanan tidak ditemukan")
+        ]
+    )]
     public function destroy($id)
     {
         $pemesanan = Pemesanan::where('user_id', Auth::id())->find($id);

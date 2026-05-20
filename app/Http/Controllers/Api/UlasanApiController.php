@@ -8,13 +8,22 @@ use App\Models\Ulasan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use OpenApi\Attributes as OA;
 
 class UlasanApiController extends Controller
 {
-    /**
-     * GET /api/ulasan
-     * Daftar ulasan (publik). Bisa filter dengan ?kosan_id=.
-     */
+    #[OA\Get(
+        path: "/api/ulasan",
+        summary: "Daftar ulasan (publik)",
+        tags: ["Ulasan"],
+        parameters: [
+            new OA\Parameter(name: "kosan_id", in: "query", description: "Filter ulasan berdasarkan ID Kosan", schema: new OA\Schema(type: "integer")),
+            new OA\Parameter(name: "per_page", in: "query", description: "Jumlah data per halaman", schema: new OA\Schema(type: "integer", default: 10))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Berhasil mengambil daftar ulasan")
+        ]
+    )]
     public function index(Request $request)
     {
         $query = Ulasan::with(['user:id,nama', 'kosan:id,nama_kosan']);
@@ -43,10 +52,18 @@ class UlasanApiController extends Controller
         ]);
     }
 
-    /**
-     * GET /api/ulasan/{id}
-     * Detail ulasan (publik).
-     */
+    #[OA\Get(
+        path: "/api/ulasan/{id}",
+        summary: "Detail ulasan (publik)",
+        tags: ["Ulasan"],
+        parameters: [
+            new OA\Parameter(name: "id", in: "path", required: true, description: "ID Ulasan", schema: new OA\Schema(type: "integer"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Berhasil mengambil detail ulasan"),
+            new OA\Response(response: 404, description: "Ulasan tidak ditemukan")
+        ]
+    )]
     public function show($id)
     {
         $ulasan = Ulasan::with(['user:id,nama', 'kosan:id,nama_kosan'])->find($id);
@@ -65,10 +82,29 @@ class UlasanApiController extends Controller
         ]);
     }
 
-    /**
-     * POST /api/ulasan
-     * Tambah ulasan untuk kosan (harus pernah menyewa dan disetujui).
-     */
+    #[OA\Post(
+        path: "/api/ulasan",
+        summary: "Tambah ulasan untuk kosan (harus pernah menyewa)",
+        tags: ["Ulasan"],
+        security: [["bearerAuth" => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["kosan_id", "rating"],
+                properties: [
+                    new OA\Property(property: "kosan_id", type: "integer", example: 1),
+                    new OA\Property(property: "rating", type: "integer", minimum: 1, maximum: 5, example: 5),
+                    new OA\Property(property: "komentar", type: "string", example: "Tempatnya bersih dan nyaman.")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: "Ulasan berhasil ditambahkan"),
+            new OA\Response(response: 403, description: "Hanya penyewa yang bisa mengulas"),
+            new OA\Response(response: 409, description: "Sudah pernah mengulas"),
+            new OA\Response(response: 422, description: "Validation error")
+        ]
+    )]
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -134,10 +170,29 @@ class UlasanApiController extends Controller
         ], 201);
     }
 
-    /**
-     * PATCH /api/ulasan/{id}
-     * Update ulasan milik user sendiri.
-     */
+    #[OA\Patch(
+        path: "/api/ulasan/{id}",
+        summary: "Update ulasan milik sendiri",
+        tags: ["Ulasan"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "id", in: "path", required: true, description: "ID Ulasan", schema: new OA\Schema(type: "integer"))
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: "rating", type: "integer", minimum: 1, maximum: 5),
+                    new OA\Property(property: "komentar", type: "string")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: "Ulasan berhasil diperbarui"),
+            new OA\Response(response: 403, description: "Forbidden"),
+            new OA\Response(response: 404, description: "Ulasan tidak ditemukan")
+        ]
+    )]
     public function update(Request $request, $id)
     {
         $ulasan = Ulasan::find($id);
@@ -180,10 +235,20 @@ class UlasanApiController extends Controller
         ]);
     }
 
-    /**
-     * DELETE /api/ulasan/{id}
-     * Hapus ulasan milik user sendiri atau admin.
-     */
+    #[OA\Delete(
+        path: "/api/ulasan/{id}",
+        summary: "Hapus ulasan milik sendiri atau admin",
+        tags: ["Ulasan"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "id", in: "path", required: true, description: "ID Ulasan", schema: new OA\Schema(type: "integer"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Ulasan berhasil dihapus"),
+            new OA\Response(response: 403, description: "Forbidden"),
+            new OA\Response(response: 404, description: "Ulasan tidak ditemukan")
+        ]
+    )]
     public function destroy($id)
     {
         $ulasan = Ulasan::find($id);
