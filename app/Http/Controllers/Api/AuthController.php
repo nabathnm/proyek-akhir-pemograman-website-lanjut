@@ -7,12 +7,40 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use OpenApi\Attributes as OA;
 
 class AuthController extends Controller
 {
-    /**
-     * Login dan dapatkan JWT token.
-     */
+    #[OA\Post(
+        path: "/api/login",
+        summary: "Login user dan dapatkan JWT token",
+        tags: ["Auth"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["email", "password"],
+                properties: [
+                    new OA\Property(property: "email", type: "string", format: "email", example: "user@example.com"),
+                    new OA\Property(property: "password", type: "string", format: "password", example: "password123")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Login berhasil",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "Login berhasil"),
+                        new OA\Property(property: "data", type: "object")
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: "Unauthorized"),
+            new OA\Response(response: 422, description: "Validation error")
+        ]
+    )]
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -40,9 +68,28 @@ class AuthController extends Controller
         return $this->respondWithToken($token);
     }
 
-    /**
-     * Register user baru.
-     */
+    #[OA\Post(
+        path: "/api/register",
+        summary: "Register user baru",
+        tags: ["Auth"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["nama", "email", "password"],
+                properties: [
+                    new OA\Property(property: "nama", type: "string", example: "Budi Santoso"),
+                    new OA\Property(property: "email", type: "string", format: "email", example: "budi@example.com"),
+                    new OA\Property(property: "password", type: "string", format: "password", example: "password123"),
+                    new OA\Property(property: "no_telepon", type: "string", example: "08123456789"),
+                    new OA\Property(property: "role", type: "string", enum: ["user", "pemilik"], example: "user")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: "Registrasi berhasil"),
+            new OA\Response(response: 422, description: "Validation error")
+        ]
+    )]
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -85,9 +132,16 @@ class AuthController extends Controller
         ], 201);
     }
 
-    /**
-     * Dapatkan data user yang sedang login.
-     */
+    #[OA\Get(
+        path: "/api/me",
+        summary: "Dapatkan data user yang sedang login",
+        tags: ["Auth"],
+        security: [["bearerAuth" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "Berhasil mengambil data"),
+            new OA\Response(response: 401, description: "Unauthenticated")
+        ]
+    )]
     public function me()
     {
         return response()->json([
