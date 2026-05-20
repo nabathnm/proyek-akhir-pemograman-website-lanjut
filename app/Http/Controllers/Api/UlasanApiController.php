@@ -12,45 +12,67 @@ use Illuminate\Support\Facades\Validator;
 class UlasanApiController extends Controller
 {
     /**
-     * GET /api/kosan/{id}/ulasan
-     * Daftar ulasan untuk satu kosan (publik).
+     * GET /api/ulasan
+     * Daftar ulasan (publik). Bisa filter dengan ?kosan_id=.
      */
-    public function index($id)
+    public function index(Request $request)
     {
-        $kosan = Kosan::find($id);
+        $query = Ulasan::with(['user:id,nama', 'kosan:id,nama_kosan']);
 
-        if (! $kosan) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Kosan tidak ditemukan',
-            ], 404);
+        if ($request->filled('kosan_id')) {
+            $query->where('kosan_id', $request->kosan_id);
         }
 
-        $ulasans = Ulasan::with('user:id,nama')
-            ->where('kosan_id', $id)
-            ->latest()
-            ->get();
+        $ulasans = $query->latest()->paginate($request->get('per_page', 10));
 
-        $rataRating = $ulasans->avg('rating');
+        $summary = null;
+        if ($request->filled('kosan_id')) {
+            $rataRating = Ulasan::where('kosan_id', $request->kosan_id)->avg('rating');
+            $total = Ulasan::where('kosan_id', $request->kosan_id)->count();
+            $summary = [
+                'rata_rating' => $rataRating ? round($rataRating, 1) : 0,
+                'total' => $total,
+            ];
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'Ulasan berhasil diambil',
-            'data'    => [
-                'rata_rating' => round($rataRating, 1),
-                'total'       => $ulasans->count(),
-                'ulasans'     => $ulasans,
-            ],
+            'data'    => $ulasans,
+            'summary' => $summary,
         ]);
     }
 
     /**
-     * POST /api/kosan/{id}/ulasan
+     * GET /api/ulasan/{id}
+     * Detail ulasan (publik).
+     */
+    public function show($id)
+    {
+        $ulasan = Ulasan::with(['user:id,nama', 'kosan:id,nama_kosan'])->find($id);
+
+        if (! $ulasan) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ulasan tidak ditemukan',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Detail ulasan berhasil diambil',
+            'data'    => $ulasan,
+        ]);
+    }
+
+    /**
+     * POST /api/ulasan
      * Tambah ulasan untuk kosan (harus pernah menyewa dan disetujui).
      */
-    public function store(Request $request, $id)
+    public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'kosan_id' => 'required|exists:kosans,id',
             'rating'   => 'required|integer|min:1|max:5',
             'komentar' => 'nullable|string|max:500',
         ]);
@@ -63,7 +85,7 @@ class UlasanApiController extends Controller
             ], 422);
         }
 
-        $kosan = Kosan::find($id);
+        $kosan = Kosan::find($request->kosan_id);
 
         if (! $kosan) {
             return response()->json([
@@ -75,7 +97,7 @@ class UlasanApiController extends Controller
         // Cek apakah user pernah menyewa kos ini dan disetujui
         $sudahSewa = Auth::user()
             ->pemesanans()
-            ->where('kosan_id', $id)
+            ->where('kosan_id', $request->kosan_id)
             ->where('status', 'disetujui')
             ->exists();
 
@@ -88,7 +110,7 @@ class UlasanApiController extends Controller
 
         // Cek sudah pernah mengulas atau belum
         $sudahUlas = Ulasan::where('user_id', Auth::id())
-            ->where('kosan_id', $id)
+            ->where('kosan_id', $request->kosan_id)
             ->exists();
 
         if ($sudahUlas) {
@@ -100,7 +122,7 @@ class UlasanApiController extends Controller
 
         $ulasan = Ulasan::create([
             'user_id'  => Auth::id(),
-            'kosan_id' => $id,
+            'kosan_id' => $request->kosan_id,
             'rating'   => $request->rating,
             'komentar' => $request->komentar,
         ]);
@@ -113,18 +135,73 @@ class UlasanApiController extends Controller
     }
 
     /**
-     * DELETE /api/ulasan/{id}
-     * Hapus ulasan milik user sendiri.
+     * PATCH /api/ulasan/{id}
+     * Update ulasan milik user sendiri.
      */
-    public function destroy($id)
+    public function update(Request $request, $id)
     {
-        $ulasan = Ulasan::where('user_id', Auth::id())->find($id);
+        $ulasan = Ulasan::find($id);
 
         if (! $ulasan) {
             return response()->json([
                 'success' => false,
-                'message' => 'Ulasan tidak ditemukan atau bukan milik Anda',
+                'message' => 'Ulasan tidak ditemukan',
             ], 404);
+        }
+
+        $user = Auth::user();
+
+        if ($ulasan->user_id !== $user->id && $user->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk mengubah ulasan ini',
+            ], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'rating'   => 'sometimes|required|integer|min:1|max:5',
+            'komentar' => 'nullable|string|max:500',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        $ulasan->update($validator->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Ulasan berhasil diperbarui',
+            'data'    => $ulasan->fresh('user:id,nama'),
+        ]);
+    }
+
+    /**
+     * DELETE /api/ulasan/{id}
+     * Hapus ulasan milik user sendiri atau admin.
+     */
+    public function destroy($id)
+    {
+        $ulasan = Ulasan::find($id);
+
+        if (! $ulasan) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ulasan tidak ditemukan',
+            ], 404);
+        }
+
+        $user = Auth::user();
+
+        if ($ulasan->user_id !== $user->id && $user->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk menghapus ulasan ini',
+            ], 403);
         }
 
         $ulasan->delete();

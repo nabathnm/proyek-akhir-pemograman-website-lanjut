@@ -16,7 +16,25 @@ class KosanApiController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Kosan::with('fotoUtama')->where('status', 'aktif');
+        $user = Auth::guard('api')->user();
+
+        if ($request->boolean('mine')) {
+            if (! $user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized',
+                ], 401);
+            }
+            if ($user->role !== 'pemilik') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya pemilik yang dapat melihat kosan miliknya',
+                ], 403);
+            }
+            $query = Kosan::with('fotoUtama')->where('user_id', $user->id);
+        } else {
+            $query = Kosan::with('fotoUtama')->where('status', 'aktif');
+        }
 
         // Filter opsional
         if ($request->filled('kota')) {
@@ -64,31 +82,6 @@ class KosanApiController extends Controller
             'success' => true,
             'message' => 'Detail kosan berhasil diambil',
             'data'    => $kosan,
-        ]);
-    }
-
-    /**
-     * GET /api/my-kosan
-     * Kosan milik pemilik yang sedang login.
-     */
-    public function myKosan()
-    {
-        if (Auth::user()->role !== 'pemilik') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Hanya pemilik yang dapat mengakses fitur ini',
-            ], 403);
-        }
-
-        $kosans = Kosan::with('fotoUtama')
-            ->where('user_id', Auth::id())
-            ->latest()
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Daftar kosan saya berhasil diambil',
-            'data'    => $kosans,
         ]);
     }
 
