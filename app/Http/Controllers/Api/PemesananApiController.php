@@ -141,12 +141,12 @@ class PemesananApiController extends Controller
     }
 
     /**
-     * PATCH /api/pemesanan/{id}/status
+     * PATCH /api/pemesanan/{id}
      * Update status pemesanan.
      * - Pemilik: bisa setujui (disetujui) atau tolak (ditolak)
      * - User: bisa batalkan (dibatalkan) jika masih pending
      */
-    public function updateStatus(Request $request, $id)
+    public function update(Request $request, $id)
     {
         $pemesanan = Pemesanan::with('kosan')->find($id);
 
